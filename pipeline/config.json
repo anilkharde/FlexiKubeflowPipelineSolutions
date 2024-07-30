@@ -1,0 +1,38 @@
+{
+    "process_input":{
+        "input_parameter":"input_parameter_from_config"
+    },
+    "pipeline_config":{
+        "code_path": "/home/jovyan/FlexiKubelowPipelineSolutions",
+        "pvc": {
+          "name": "efs-pvc-notebook",
+          "mount_path": "/home/jovyan"
+        },
+        "kubeflow_endpoint": "https://kubeflow-dashboard.abk.org/",
+        "username": "user@example.com",
+        "password": "12341234",
+        "packages_to_install": [
+          "pandas",
+          "numpy",
+          "kfp==1.8.22"
+        ],
+        "pre_process": {
+          "memory_request": "1Gi",
+          "cpu_request": "1000m",
+          "memory_limit": "2Gi",
+          "cpu_limit": "2000m"
+        },
+        "custom_process": {
+          "memory_request": "1Gi",
+          "cpu_request": "1000m",
+          "memory_limit": "2Gi",
+          "cpu_limit": "2000m"
+        },
+        "post_process": {
+          "memory_request": "1Gi",
+          "cpu_request": "1000m",
+          "memory_limit": "2Gi",
+          "cpu_limit": "2000m"
+        }
+      }
+}
