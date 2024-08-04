@@ -26,10 +26,12 @@ class FlexiPipeline():
 
     @staticmethod
     def custom_process(
-        config_data: dict):
+        config_data: dict,
+        image_id: str):
         import os
         import sys
         import logging
+            
         code_path = config_data['pipeline_config']['code_path']
         logging.info(os.listdir(code_path))
         sys.path.append(code_path)
@@ -39,7 +41,8 @@ class FlexiPipeline():
 
         try:
             #Process implementation
-            print("Running Custom Process...")
+            print("code_path: ", code_path)
+            print(f"Running Custom Process for image id {image_id}...")
             obj = CustomProcess(5)
             param = config_data['process_input']['input_parameter']
             print(param)
@@ -73,7 +76,7 @@ class FlexiPipeline():
         post_process_fn = self.get_post_process_fn()
 
         @dsl.pipeline("Process Name", "Process Description")
-        def custom_process_pipeline():
+        def custom_process_pipeline(self):
 
             packages_installation = config_data['pipeline_config']['packages_to_install']
            
@@ -93,7 +96,7 @@ class FlexiPipeline():
                                                 )
             create_pre_process_task = create_pre_process_op()
             create_pre_process_task.execution_options.caching_strategy.max_cache_staleness = "P0D" # Disable caching
-            create_pre_process_task.set_retry(3,policy="Always",backoff_duration="2m")
+            create_pre_process_task.set_retry(1,policy="Always",backoff_duration="2m")
 
             #Custom process task
             create_custom_process_op = components.create_component_from_func(
@@ -116,7 +119,7 @@ class FlexiPipeline():
                 task.execution_options.caching_strategy.max_cache_staleness = "P0D" # Disable caching
                 
                 task.set_display_name(f"Process for image id {image_id}")
-                task.set_retry(3,policy="Always",backoff_duration="2m")
+                task.set_retry(1,policy="Always",backoff_duration="2m")
                 task.after(create_pre_process_task)
                 tasks.append(task)
 
@@ -127,7 +130,7 @@ class FlexiPipeline():
                                                 )
             create_post_process_task = create_post_process_op()
             create_post_process_task.execution_options.caching_strategy.max_cache_staleness = "P0D" # Disable caching
-            create_post_process_task.set_retry(3,policy="Always",backoff_duration="2m")
+            create_post_process_task.set_retry(1,policy="Always",backoff_duration="2m")
 
             for task in tasks:
                 create_post_process_task.after(task)
@@ -151,7 +154,7 @@ class FlexiPipeline():
         session.post(response.url, headers=headers, data=data)
         session_cookie = session.cookies.get_dict()["authservice_session"]
         client = kfp.Client(host=f"{kubeflow_endpoint}/pipeline", cookies=f"authservice_session={session_cookie}")
-        
+        print("Image_ids in create run:", image_ids)
         try: 
             timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             run_id = client.create_run_from_pipeline_func(
